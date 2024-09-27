@@ -3,7 +3,7 @@ import numpy as np
 import sqlalchemy
 import datetime as dt
 
-from sqlalchemy.ext.automap import automap_base, name_for_collection_relationship
+from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 from flask import Flask,jsonify
@@ -17,14 +17,11 @@ engine = create_engine("sqlite:///hawaii.sqlite")
 # reflect an existing database into a new model
 Base = automap_base()
 
-# reflect an existing database into a new model
-Base = automap_base()
-
 # reflect the tables
 Base.prepare(engine, reflect=True)
 
 # View all of the classes that automap found
-Base.classes.keys()
+print(Base.classes.keys())
 
 # Save references to each table
 Measurement = Base.classes.measurement
@@ -33,7 +30,6 @@ Station = Base.classes.station
 #################################################
 # Flask Setup
 #################################################
-
 app = Flask(__name__)
 
 #################################################
@@ -54,14 +50,15 @@ def home():
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
+    # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    MaxDate = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
-    MaxDate = MaxDate[0]
-    MaxDay = int(MaxDate[-2:])
-    MaxYear= int(MaxDate[:4])
-    MaxMonth = int(MaxDate[5:7])
-    previous_year = dt.date(MaxYear,MaxMonth,MaxDay)-dt.timedelta(days=365)
+    max_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    max_date = max_date[0]
+    max_day = int(max_date[-2:])
+    max_year= int(max_date[:4])
+    max_month = int(max_date[5:7])
+    previous_year = dt.date(max_year,max_month,max_day)-dt.timedelta(days=365)
 
     prec_query = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= previous_year).order_by(Measurement.date).all()
 
@@ -77,8 +74,9 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
+    # Create our session (link) from Python to the DB
     session = Session(engine)
-
+    
     station_query = session.query(Station.id, Station.station, Station.name).\
     all()
 
@@ -94,14 +92,15 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
+    # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    MaxDate = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
-    MaxDate = MaxDate[0]
-    MaxDay = int(MaxDate[-2:])
-    MaxYear= int(MaxDate[:4])
-    MaxMonth = int(MaxDate[5:7])
-    previous_year = dt.date(MaxYear,MaxMonth,MaxDay)-dt.timedelta(days=365)
+    max_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    max_date = max_date[0]
+    max_day = int(max_date[-2:])
+    max_year= int(max_date[:4])
+    max_month = int(max_date[5:7])
+    previous_year = dt.date(max_year,max_month,max_day)-dt.timedelta(days=365)
 
     tobs_query = session.query(Station.name, Measurement.date, Measurement.tobs).\
     filter(Station.station == Measurement.station,Station.id == '7', Measurement.date >= previous_year).all()
@@ -118,7 +117,7 @@ def tobs():
 
 @app.route("/api/v1.0/<start>")
 def startdate(start = ""):
-
+    # Create our session (link) from Python to the DB
     session = Session(engine)
 
     selection = [func.min(Measurement.tobs), func.avg(Measurement.tobs),func.max(Measurement.tobs)]
@@ -143,5 +142,5 @@ def start_and_end(start = "", end  = ""):
 
     session.close()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
