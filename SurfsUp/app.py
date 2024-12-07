@@ -103,7 +103,7 @@ def tobs():
     previous_year = dt.date(max_year,max_month,max_day)-dt.timedelta(days=365)
 
     tobs_query = session.query(Station.name, Measurement.date, Measurement.tobs).\
-    filter(Station.station == Measurement.station,Station.id == '7', Measurement.date >= previous_year).all()
+    filter(Station.station == Measurement.station,Station.id == 'USC00519281', Measurement.date >= previous_year).all()
 
     session.close()
 
